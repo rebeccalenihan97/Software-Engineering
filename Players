@@ -1,0 +1,169 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+
+// struct //
+struct players
+{
+	char type[6];
+	char name[10];
+	int life_points;
+	int smartness, strength, magic_skills, luck, dexterity;
+	int playernos, i;
+	
+};
+
+// functions for the player types //
+void Elf(struct players *structname);
+void Human(struct players *structname);
+void Ogre(struct players *structname);
+void Wizard(struct players *structname);
+
+int main(void)
+{	
+	// ensures new random number each time //
+	srand(time(NULL));
+	
+	// declaring variables //
+	int i, playernos, type, life_points = 100;
+
+	char name[10];
+	
+	// users input of number of players //
+	printf("Please enter a maximum of 6 players.\n");
+	scanf("%d", &playernos);
+		
+	// calling struct //
+	struct players newplayers[playernos];
+	
+	// for loop for user to choose player types //
+	for(i=0;i<playernos;i++)
+	{
+		printf("Please choose a player type\n");
+		printf("Type '1' for Elf, '2' for Human, '3' for Ogre, '4' for Wizard");
+		scanf("%d", &type);
+	
+	// switch statement for users input of player type //
+	switch(type)
+{
+	case 1:
+	strcpy(newplayers[i].type, "Elf");
+	break;
+	case 2:
+	strcpy(newplayers[i].type, "Human");
+	break;
+	case 3:
+	strcpy(newplayers[i].type, "Ogre");
+	break;
+	case 4:
+	strcpy(newplayers[i].type, "Wizard");
+	break;
+}
+
+	// if statements to call functions based on users choice of types //
+	if(type == 2)
+		{
+			Human(&newplayers[i]);
+		}
+	
+		else if(type == 3)
+		{
+			Ogre(&newplayers[i]);
+		}
+		
+		else if(type == 1)
+		{
+			Elf(&newplayers[i]);
+		}
+		
+		else if(type == 4)
+		{	
+			Wizard(&newplayers[i]);
+		}
+	}
+
+	// for loop for user to enter player names //
+	for(i=0;i<playernos;i++)
+	{
+		printf("Please enter the player names\n");
+		scanf("%s", newplayers[i].name);
+	}
+	
+return 0;
+
+}
+
+// function for type - human //
+void Human(struct players *structname)
+{	
+	// declaring variables //
+    int sum = 300;
+ 
+    (*structname).life_points = 100;
+ 
+ 	// while loop to recalculate values for capabilities if the sum of capabilities is over 300 //
+    while(sum >= 300)
+    {
+    	// calculates random numbers for capabilities //
+        (*structname).smartness = rand() % 100 + 1;
+        (*structname).strength = rand() % 100 + 1;
+        (*structname).magic_skills = rand() % 100 + 1;
+        (*structname).luck = rand() % 100 + 1;
+        (*structname).dexterity = rand() % 100 + 1;
+ 	
+ 		// calculates the sum // 
+        sum = (*structname).smartness + (*structname).strength + (*structname).magic_skills + (*structname).luck + (*structname).dexterity;
+    }
+ 
+    return;
+}
+
+// function for type - ogre //
+void Ogre(struct players *structname)
+{
+	// declaring sum //
+    int sum = 51;
+ 
+    (*structname).life_points = 100;
+    (*structname).magic_skills = 0;
+ 
+ 	// while loop to recalculate sum if sum is over 50 //
+    while(sum > 50)
+    {
+        (*structname).smartness = rand() % 20 + 1;
+        (*structname).strength = rand() % 22 + 79;
+        (*structname).dexterity = rand() % 22 + 79;
+        (*structname).luck = rand() % 49 + 1;
+ 
+ 		// calculates sum //
+        sum = (*structname).luck + (*structname).smartness;
+    }
+    return;
+}
+
+// function for type - elf //
+void Elf(struct players *structname)
+{
+    (*structname).life_points = 100;
+    (*structname).smartness = rand() % 32 + 69;
+    (*structname).strength = rand() % 50 + 1;
+    (*structname).magic_skills = rand() % 30 + 50;
+    (*structname).luck = rand() % 42 + 59;
+    (*structname).dexterity = rand() % 100 + 1;
+ 
+    return;
+}
+
+// function for type - wizard //
+void Wizard(struct players *structname)
+{
+    (*structname).life_points = 100;
+    (*structname).smartness = rand() % 12 + 89;
+    (*structname).strength = rand() % 21 + 1;
+    (*structname).magic_skills = rand() % 22 + 79;
+    (*structname).luck = rand() % 52 + 49;
+    (*structname).dexterity = rand() % 100 + 1;
+ 
+    return;
+}
