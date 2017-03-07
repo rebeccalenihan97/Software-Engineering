@@ -1,0 +1,46 @@
+void attackPlayer(struct players newplayers[], struct slots slot_main[], int playernos, int slot_size, int player_no)
+{
+	int i, y;
+	int x, j;
+	
+	
+	for(i=0;i<slot_size;i++)
+	{
+		y = newplayers[i].player_no; // assigning player no to identifier y //
+		
+		if(y>0) // if it's a player 
+		{
+			if(slot_main[newplayers[player_no-1].slots+1].player >= 0) // if player in front
+			{
+				if(slot_main[newplayers[player_no-1].slots+1].player.strength <= 70) // if strength if less/equal to 70 //
+				{
+					slot_main[newplayers[player_no-1].slots+1].player.lifepoints = lifepoints - (slot_main[newplayers[player_no-1].slots+1].player.strength * 0.5); // life reduced of attacked //
+				}
+				if(slot_main[newplayers[player_no-1].slots+1].player.strength > 70)
+				{
+					slot_main[newplayers[player_no-1].slots].player.lifepoints = lifepoints - (slot_main[newplayers[player_no-1].slots+1].player.strength * 0.3); // life of attacker reduced
+				}
+			}
+		}
+	}
+	
+	for(j=0;j<slot_size;j++)
+	{
+		x = newplayers[j].player_no;
+		
+		if(x>0)
+		{
+			if(slot_main[newplayers[player_no-1].slots-1].player >= 0) // if player in front
+			{
+				if(slot_main[newplayers[player_no-1].slots-1].player.strength <= 70) // if strength if less/equal to 70 //
+				{
+					slot_main[newplayers[player_no-1].slots-1].player.lifepoints = lifepoints - (slot_main[newplayers[player_no-1].slots-1].player.strength * 0.5); // life reduced of attacked //
+				}
+				if(slot_main[newplayers[player_no-1].slots-1].player.strength > 70)
+				{
+					slot_main[newplayers[player_no-1].slots].player.lifepoints = lifepoints - (slot_main[newplayers[player_no-1].slots-1].player.strength * 0.3); // life of attacker reduced
+				}
+			}
+		}
+	}
+}
