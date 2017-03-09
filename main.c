@@ -434,7 +434,7 @@ void choice(struct players newplayers[], struct slots slot_main[], int playernos
 			if(check==players[k])
 			{
 				printf("\nThis player has already completed an action, please choose a different player.\n");
-				goto REPLAY;
+				goto REPLAY; // sends user back to input
 			}
 		}
 
@@ -449,8 +449,8 @@ void choice(struct players newplayers[], struct slots slot_main[], int playernos
 
 		if(choice == 0)
 		{
-			movePlayer(newplayers, slot_main, playernos, slot_size, player_no);
-			capabilities(playernos, slot_size, newplayers, slot_main);
+			movePlayer(newplayers, slot_main, playernos, slot_size, player_no); // user makes a move
+			capabilities(playernos, slot_size, newplayers, slot_main); // the moved player's capabilities are changed
 		}
 		else if(choice == 1)
 		{
@@ -467,22 +467,37 @@ void movePlayer(struct players newplayers[], struct slots slot_main[], int playe
 	RETRY:printf("If you would like to move 1 slot forward press '2'.\n");
 	printf("If you would like to move 1 slot back press '3'. \n");
 	do{
-	scanf("%d", &move);
+	scanf("%d", &move); // asking user whether he wants to move forward or back
 	}while(move<2 || move>3);
 
-	if(move == 2)
+	if(move == 2) // moving forward
 	{
-		if(newplayers[player_no-1].slots+1 >= slot_size) // If condition with error saying can't move further than slot_size, or if player ahead
+		if(newplayers[player_no-1].slots == 0 && slot_main[newplayers[player_no-1].slots+1].player >= 0) // if user is start of slot, moves forward and player ahead
 		{
-			printf("Can't move forwards, please move backwards.\n\n");
-			goto RETRY;
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
 		}
-		else if(slot_main[newplayers[player_no-1].slots+1].player >= 0) // if moving forward, and player ahead
+
+		else if(slot_main[newplayers[player_no-1].slots-1].player >= 0 && newplayers[player_no-1].slots == slot_size-1) // if user is at end of slot, moves forward, and player behind
 		{
-			printf("\nPlayer %d is ahead of you, and will be attacked!", slot_main[newplayers[player_no-1].slots+1].player+1);
-			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); //ATTACK PLAYER
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
 		}
-		else if(slot_main[newplayers[player_no-1].slots+1].player == -1) // if moving forward and empty space ahead /*WHEN PRESS 2 IT MOVES BACK, WHEN PRESS 3 IT MOVES FORWARD*/
+
+
+		else if(slot_main[newplayers[player_no-1].slots+1].player >= 0 && slot_main[newplayers[player_no-1].slots-1].player >= 0) // if user is surrounded by players
+		{
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
+		}
+
+		else if(slot_main[newplayers[player_no-1].slots+1].player >= 0 || newplayers[player_no-1].slots+1 == slot_size) // if moving forward, and player ahead or if use is at last slot
+		{
+			printf("Can't move forward, please move back.\n\n");
+			goto RETRY; // sends user back to menu
+		}
+
+		else if(slot_main[newplayers[player_no-1].slots+1].player == -1) // if moving forward and empty space ahead
 		{
 			temp = slot_main[newplayers[player_no-1].slots].player; // places players ID to identifier temp
 			slot_main[newplayers[player_no-1].slots].player = -1; // makes players initial position empty
@@ -492,17 +507,31 @@ void movePlayer(struct players newplayers[], struct slots slot_main[], int playe
 		}
 	}
 
-	else if(move == 3) // if user wants to move player backwards
+	else if(move == 3) // if moving back
 	{
-		if(newplayers[player_no-1].slots-1 < 0) // error saying can't move back less than slot position 0
+
+		if(newplayers[player_no-1].slots == 0 && slot_main[newplayers[player_no-1].slots+1].player >= 0) // if start of slot and player ahead
 		{
-			printf("Can't move backwards, please move forwards.\n\n");
-			goto RETRY;
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
 		}
 
-		else if(slot_main[newplayers[player_no-1].slots-1].player >= 0) // if there's a player behind
+		else if(slot_main[newplayers[player_no-1].slots-1].player >= 0 && newplayers[player_no-1].slots == slot_size-1) // if end of slot and player behind
 		{
-			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); //ATTACK PLAYER
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
+		}
+
+		else if(slot_main[newplayers[player_no-1].slots+1].player >= 0 && slot_main[newplayers[player_no-1].slots-1].player >= 0) // if user is surrounded by two players
+		{
+			printf("You are trapped! Your player will attack instead!");
+			attackPlayer(newplayers, slot_main, playernos, slot_size, player_no); // force user to attack
+		}
+
+		else if(slot_main[newplayers[player_no-1].slots-1].player >= 0 || newplayers[player_no-1].slots == 0) // if there's a player behind or if user is at first slot
+		{
+			printf("Can't move back, please move forwards.\n\n");
+			goto RETRY; // sending user back to menu
 		}
 
 		else if(slot_main[newplayers[player_no-1].slots-1].player == -1) // if there's an empty space, then move
@@ -518,90 +547,119 @@ void movePlayer(struct players newplayers[], struct slots slot_main[], int playe
 
 void attackPlayer(struct players newplayers[], struct slots slot_main[], int playernos, int slot_size, int player_no)
 {
-    int i,j;
+    int i=1;
     int a,b,c,x,y; // keeps track of either the player which is attacking, or being attacked,
-
-    for(i=1, j=1;(newplayers[player_no-1].slots-i>=0) && (newplayers[player_no-1].slots+j<slot_size);i++, j++)
-    {
-    	if(newplayers[player_no-1].slots-j >= 0 && slot_main[newplayers[player_no-1].slots-i].player >= 0) // scans from player_no's position down, to find next player to attack
-    	{
-    		x = slot_main[newplayers[player_no-1].slots].player; // attacker
-    		y = slot_main[newplayers[player_no-1].slots-i].player; // attacked
-
-    		if(newplayers[y].strength <= 70)
-    		{
-    			printf("\nPlayer %d is behind you, and will be attacked!", y+1);
-    			newplayers[y].life_points -= 0.5*(newplayers[y].strength);
-    			return;
-    		}
-    		else if(newplayers[y].strength > 70)
-    		{
-    			printf("\nPlayer %d is behind you, and will be attacked!", y+1);
-    			newplayers[x].life_points -= 0.3*(newplayers[y].strength);
-    			return;
-    		}
-    	}
-
-    	if(newplayers[player_no-1].slots+j < slot_size && slot_main[newplayers[player_no-1].slots+j].player >= 0) // scans from player_no's position up, to find next player to attack
-    	{
-    	    x = slot_main[newplayers[player_no-1].slots].player; // attacker
-    	    y = slot_main[newplayers[player_no-1].slots+j].player; // attacked
-
-    	    if(newplayers[y].strength <= 70)
-    	    {
-    		   	printf("\nPlayer %d is ahead of you, and will be attacked!", y+1);
-    		   	newplayers[y].life_points -= 0.5*(newplayers[y].strength);
-    		   	return;
-    	    }
-    		else if(newplayers[y].strength > 70)
-    		{
-    		    printf("\nPlayer %d is ahead of you, and will be attacked!", y+1);
-    		    newplayers[x].life_points -= 0.3*(newplayers[y].strength);
-    		    return;
-    		}
-    	}
-
-    	if(i == j && (slot_main[newplayers[player_no-1].slots-i].player >= 0 && slot_main[newplayers[player_no-1].slots+j].player >= 0)) // if player behind you and ahead of you are same distance apart
-    	{
-    		a = slot_main[newplayers[player_no-1].slots-i].player; // attacked
-    		b = slot_main[newplayers[player_no-1].slots+j].player; // attacked
-    		c = slot_main[newplayers[player_no-1].slots].player;   // attacker
-
-    		int player;
-
-    		printf("\nPlayer %d and Player %d are same distance away from you, who would you like to attack? %d or %d:", a+1,b+1,a+1,b+1);
-    		do{
-    			scanf("%d", &player);
-    		}while(player-1 == a || player-1 == b);
-
-    		if(newplayers[player-1].strength <= 70)
-    		{
-    		  	newplayers[player-1].life_points -= 0.5*(newplayers[player-1].strength);
-    		   	return;
-    		}
-    		else if(newplayers[player-1].strength > 70)
-    		{
-    		    newplayers[c].life_points -= 0.3*(newplayers[player-1].strength);
-    		    return;
-    		}
+    int action=0;
 
 
-    	}
-    }
+   do{
+	   	   if(newplayers[player_no-1].slots-i >= 0 && newplayers[player_no-1].slots+i < slot_size) // checking if slot positions are within range
+	   	   {
+	   		   if(slot_main[newplayers[player_no-1].slots-i].player == -1 && slot_main[newplayers[player_no-1].slots+i].player == -1) // if the two slots have no players
+				{
+	   			   i++;
+				}
+	   		   else if((slot_main[newplayers[player_no-1].slots-i].player != -1) && (slot_main[newplayers[player_no-1].slots+i].player != -1)) // if player behind user and ahead of user are same distance apart
+	   		   {
+	   			   a = slot_main[newplayers[player_no-1].slots-i].player; // attacked
+	   			   b = slot_main[newplayers[player_no-1].slots+i].player; // attacked
+	   			   c = slot_main[newplayers[player_no-1].slots].player;   // attacker
+
+	   			   int player;
+
+	   			   printf("\nPlayer %d and Player %d are same distance away from you, who would you like to attack? %d or %d:", a+1,b+1,a+1,b+1);
+	   			   do{
+	   				   scanf("%d", &player); // asking user which player they prefer to attack
+	   			   }while((player < a+1 && player > a+1) || (player < b+1 && player > b+1));
+
+	   			   if(newplayers[player-1].strength <= 70)
+	   			   {
+	   				   printf("\nPlayer %d will be attacked!\n", player);
+	   				   newplayers[player-1].life_points -= 0.5*(newplayers[player-1].strength);
+	   				   action = 1;
+	   				   break; // ensuring the do while loop exits once action is completed
+	   			   }
+	   			   else if(newplayers[player-1].strength > 70)
+	   			   {
+	   				   printf("\nPlayer %d will be attacked!\n", player);
+	   				   newplayers[c].life_points -= 0.3*(newplayers[player-1].strength);
+	   				   action = 1;
+	   				   break; // ensuring the do while loop exits once action is completed
+	   			   }
+	   		   }
+
+	   	   }
+
+	   	i=1; // resets i back to 1 to avoid any errors
+	   	if(newplayers[player_no-1].slots+i < slot_size)
+	   	{
+	  	   if(slot_main[newplayers[player_no-1].slots+i].player == -1)
+	  	   {
+	  		   i++;
+	  	   }
+	   	   else if(slot_main[newplayers[player_no-1].slots+i].player >= 0) // scans from player_no's position up, to find next player to attack
+	 	   {
+	   		   x = slot_main[newplayers[player_no-1].slots].player; // attacker
+	   		   y = slot_main[newplayers[player_no-1].slots+i].player; // attacked
+
+	   	   	  if(newplayers[y].strength <= 70)
+	   	   	  {
+	   	   		  printf("\nPlayer %d will be attacked!\n", y+1);
+	   	   		  newplayers[y].life_points -= 0.5*(newplayers[y].strength);
+	   	   		  action = 1;
+	   	   		  break; // ensuring the do while loop exits once action is completed
+	   	   	  }
+	   	   	  else if(newplayers[y].strength > 70)
+	   	   	  {
+	   	   		  printf("\nPlayer %d will be attacked!\n", y+1);
+	   	   		  newplayers[x].life_points -= 0.3*(newplayers[y].strength);
+	   	   		  action = 1;
+	   	   		  break; // ensuring the do while loop exits once action is completed
+	   	   	  }
+	 	   	}
+	   	}
+
+	   	i=1; // resets i back to 1 to avoid any errors
+	   	if(newplayers[player_no-1].slots-i >= 0) // when scanning back, ensuring it doesn't go past slot 0
+	   	{
+	   	   if(slot_main[newplayers[player_no-1].slots-i].player == -1)
+	   	   {
+	   		   i++;
+	   	   }
+	   	   else if(slot_main[newplayers[player_no-1].slots-i].player >= 0) // scans from player_no's position down, to find next player to attack
+		   {
+	   		   x = slot_main[newplayers[player_no-1].slots].player; // attacker
+	   		   y = slot_main[newplayers[player_no-1].slots-i].player; // attacked
+
+	   		  if(newplayers[y].strength <= 70)
+	   		  {
+	   			  printf("\nPlayer %d will be attacked!\n", y+1);
+	   			  newplayers[y].life_points -= 0.5*(newplayers[y].strength);
+	   			  action = 1;
+	   			  break; // ensuring the do while loop exits once action is completed
+	   		  }
+	   		  else if(newplayers[y].strength > 70)
+	   		  {
+	   			  printf("\nPlayer %d will be attacked!\n", y+1);
+	   			  newplayers[x].life_points -= 0.3*(newplayers[y].strength);
+	   			  action = 1;
+	   			  break; // ensuring the do while loop exits once action is completed
+	   		  }
+		   }
+	   	}
+
+    }while(action == 0);
 }
 
 void printOutput(struct players newplayers[], struct slots slot_main[], int playernos, int slot_size)
 {
 	int i;
 
-	printf("\n\n%-10s%-10s%-12s\n", "Name", "Type", "Life points");
-	printf("-------------------------------\n");
+	printf("\n\n%-3s%-10s%-10s%-12s\n", "#", "Name", "Type", "Life points");
+	printf("----------------------------------\n");
 
-	for(i=0;i<slot_size;i++)
+	for(i=0;i<playernos;i++)
 	{
-		if(slot_main[i].player >=0)
-		{
-			printf("%-10s%-10s%-4d\n", newplayers[slot_main[i].player].name, newplayers[slot_main[i].player].type, newplayers[slot_main[i].player].life_points);
-		}
+		printf("%-3d%-10s%-10s%-4d\n",i+1, newplayers[i].name, newplayers[i].type, newplayers[i].life_points);
 	}
 }
