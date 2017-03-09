@@ -552,43 +552,45 @@ void attackPlayer(struct players newplayers[], struct slots slot_main[], int pla
     int action=0;
 
 
-   do{
-	   	   if(newplayers[player_no-1].slots-i >= 0 && newplayers[player_no-1].slots+i < slot_size) // checking if slot positions are within range
+    while(action == 0)
+    {
+    	i=1;
+    	if(newplayers[player_no-1].slots-i >= 0 && newplayers[player_no-1].slots+i < slot_size) // checking if slot positions are within range
+	   	{
+	   	   if(slot_main[newplayers[player_no-1].slots-i].player == -1 && slot_main[newplayers[player_no-1].slots+i].player == -1) // if the two slots have no players
+			{
+	   		   i++;
+			}
+	   	   else if((slot_main[newplayers[player_no-1].slots-i].player != -1) && (slot_main[newplayers[player_no-1].slots+i].player != -1)) // if player behind user and ahead of user are same distance apart
 	   	   {
-	   		   if(slot_main[newplayers[player_no-1].slots-i].player == -1 && slot_main[newplayers[player_no-1].slots+i].player == -1) // if the two slots have no players
-				{
-	   			   i++;
-				}
-	   		   else if((slot_main[newplayers[player_no-1].slots-i].player != -1) && (slot_main[newplayers[player_no-1].slots+i].player != -1)) // if player behind user and ahead of user are same distance apart
+	   		   a = slot_main[newplayers[player_no-1].slots-i].player; // attacked
+	   		   b = slot_main[newplayers[player_no-1].slots+i].player; // attacked
+	   		   c = slot_main[newplayers[player_no-1].slots].player;   // attacker
+
+	   		   int player;
+
+	   		   printf("\nPlayer %d and Player %d are same distance away from you, who would you like to attack? %d or %d:", a+1,b+1,a+1,b+1);
+	   		   do{
+	   			   scanf("%d", &player); // asking user which player they prefer to attack
+	   		   }while((player < a+1 && player > a+1) || (player < b+1 && player > b+1));
+
+	   		   if(newplayers[player-1].strength <= 70)
 	   		   {
-	   			   a = slot_main[newplayers[player_no-1].slots-i].player; // attacked
-	   			   b = slot_main[newplayers[player_no-1].slots+i].player; // attacked
-	   			   c = slot_main[newplayers[player_no-1].slots].player;   // attacker
-
-	   			   int player;
-
-	   			   printf("\nPlayer %d and Player %d are same distance away from you, who would you like to attack? %d or %d:", a+1,b+1,a+1,b+1);
-	   			   do{
-	   				   scanf("%d", &player); // asking user which player they prefer to attack
-	   			   }while((player < a+1 && player > a+1) || (player < b+1 && player > b+1));
-
-	   			   if(newplayers[player-1].strength <= 70)
-	   			   {
-	   				   printf("\nPlayer %d will be attacked!\n", player);
-	   				   newplayers[player-1].life_points -= 0.5*(newplayers[player-1].strength);
-	   				   action = 1;
-	   				   break; // ensuring the do while loop exits once action is completed
-	   			   }
-	   			   else if(newplayers[player-1].strength > 70)
-	   			   {
-	   				   printf("\nPlayer %d will be attacked!\n", player);
-	   				   newplayers[c].life_points -= 0.3*(newplayers[player-1].strength);
-	   				   action = 1;
-	   				   break; // ensuring the do while loop exits once action is completed
-	   			   }
+	   			   printf("\nPlayer %d will be attacked!\n", player);
+	   			   newplayers[player-1].life_points -= 0.5*(newplayers[player-1].strength);
+	   			   action = 1;
+	   			   break; // ensuring the do while loop exits once action is completed
 	   		   }
-
+	   		   else if(newplayers[player-1].strength > 70)
+	   		   {
+	   			   printf("\nPlayer %d will be attacked!\n", player);
+	   			   newplayers[c].life_points -= 0.3*(newplayers[player-1].strength);
+	   			   action = 1;
+	   			   break; // ensuring the do while loop exits once action is completed
+	   		   }
 	   	   }
+
+	   	}
 
 	   	i=1; // resets i back to 1 to avoid any errors
 	   	if(newplayers[player_no-1].slots+i < slot_size)
@@ -648,7 +650,7 @@ void attackPlayer(struct players newplayers[], struct slots slot_main[], int pla
 		   }
 	   	}
 
-    }while(action == 0);
+    }
 }
 
 void printOutput(struct players newplayers[], struct slots slot_main[], int playernos, int slot_size)
