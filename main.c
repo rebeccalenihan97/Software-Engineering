@@ -237,18 +237,11 @@ void slotType_random(struct slots slot_main[], int slot_size)
 void players_to_slots(struct players newplayers[], struct slots slot_main[], int playernos, int slot_size)
 {
 	srand((unsigned)time(NULL));
-	int random;
-
-	int i;
-
-	for(i=0;i<slot_size;i++)
-	{
-		random=rand()%3;
-		strcpy(slot_main[i].type, slot_type[random]);
-	}
 
 
 	//ASSIGNING EACH PLAYER TO A SLOT IN STRUCT SLOT ARRAY
+	int i;
+
 	for (i=0;i<playernos;i++)
 	{
 		slot_main[i].player = i;
